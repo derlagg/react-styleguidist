@@ -16,6 +16,7 @@
         "moduleDirectory": ["src/client", "node_modules"]
       }
     },
+    "polyfills": ["promises"],
     "react": {
       "version": "16.3",
       "flowVersion": "0.83"

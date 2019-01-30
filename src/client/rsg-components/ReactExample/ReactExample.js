@@ -1,8 +1,10 @@
 import React, { Component } from 'react';
 import PropTypes from 'prop-types';
+import Async from 'react-async';
 import Wrapper from 'rsg-components/Wrapper';
 import compileCode from '../../utils/compileCode';
 import splitExampleCode from '../../utils/splitExampleCode';
+import transpileImports from '../../utils/transpileImports';
 
 /* eslint-disable react/no-multi-comp */
 
@@ -61,19 +63,29 @@ export default class ReactExample extends Component {
 
 	render() {
 		const { code, compilerConfig, onError } = this.props;
-		const compiledCode = compileCode(code, compilerConfig, onError);
-		if (!compiledCode) {
-			return null;
-		}
+		const promiseFn = compileCode(code, compilerConfig, onError);
 
-		const { head, example } = splitExampleCode(compiledCode);
-		const initialState = this.getExampleInitialState(head);
-		const exampleComponent = this.getExampleComponent(example);
-		const wrappedComponent = (
+		return (
 			<Wrapper onError={onError}>
-				<StateHolder component={exampleComponent} initialState={initialState} />
+				<Async promiseFn={promiseFn}>
+					{({ data, isLoading }) => {
+						if (isLoading) {
+							return 'Loading.....';
+						}
+
+						const compiledCode = transpileImports(data);
+						if (!compiledCode) {
+							return null;
+						}
+
+						const { head, example } = splitExampleCode(compiledCode);
+						const initialState = this.getExampleInitialState(head);
+						const exampleComponent = this.getExampleComponent(example);
+
+						return <StateHolder component={exampleComponent} initialState={initialState} />;
+					}}
+				</Async>
 			</Wrapper>
 		);
-		return wrappedComponent;
 	}
 }
