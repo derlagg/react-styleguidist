@@ -46,6 +46,6 @@ function transform(source: string): Function<Promise<string>> {
 			return json.result.outputText;
 		}
 
-			return Promise.reject(response);
-		});
+		return Promise.reject(response);
+	});
 }
