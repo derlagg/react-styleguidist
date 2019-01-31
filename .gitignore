@@ -3,6 +3,7 @@ node_modules/
 /examples/**/styleguide/index.html
 /.publish/
 /coverage/
+/lib
 Changelog.md
 .DS_Store
 Thumbs.db
