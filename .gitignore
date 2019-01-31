@@ -1,10 +1,4 @@
 node_modules/
-/examples/**/styleguide/build
-/examples/**/styleguide/index.html
-/.publish/
-/coverage/
-/lib
-Changelog.md
 .DS_Store
 Thumbs.db
 .idea/
@@ -13,8 +7,3 @@ Thumbs.db
 *.sublime-workspace
 *.log
 .eslintcache
-yarn.lock
-/cypress/
-test/cypress/screenshots/
-test/cypress/videos/
-stats.json
