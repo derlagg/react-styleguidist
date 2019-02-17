@@ -39,8 +39,17 @@ export default function examplesLoader(source) {
 	// Note that we can't just use require() directly at runtime,
 	// because webpack changes its name to something like __webpack__require__().
 	const allCodeExamples = filter(examples, { type: 'code' });
+
 	const requiresFromExamples = allCodeExamples.reduce((requires, example) => {
-		return requires.concat(getImports(example.content));
+		// Styleguidist use acorn for search imports
+		// but when we are using TS in examples
+		// acorn crashes ofc :)
+		// Just cut the imports from code and enjoy;
+		const onlyImports = example.content.split(';')
+			.filter(part => part.match(/(import .*? from|require\(.*?\))/g))
+			.join(';');
+		const imports = getImports(onlyImports);
+		return requires.concat(imports);
 	}, []);
 
 	// Auto imported modules.
@@ -62,18 +71,25 @@ export default function examplesLoader(source) {
 	// All required or imported modules, either explicitly in examples code
 	// or implicitly (React, current component and context config option)
 	const allModules = [...requiresFromExamples, ...values(fullContext)];
+	console.log('&&allModules', allModules);
 
 	// “Prerequire” modules required in Markdown examples and context so they
 	// end up in a bundle and be available at runtime
 	const allModulesCode = allModules.reduce((requires, requireRequest) => {
+		console.log('&&requireRequest', requireRequest);
+
 		requires[requireRequest] = requireIt(requireRequest);
 		return requires;
 	}, {});
+	console.log('&&allModulesCode', allModulesCode);
 
 	// Require context modules so they are available in an example
 	const requireContextCode = b.program(
 		flatten(
-			map(fullContext, (requireRequest, name) => [
+			map(fullContext, (requireRequest, name) => {
+				 console.log('***name', name);
+				 console.log('***requireRequest', requireRequest);
+				return [
 				// const name$0 = require(path);
 				b.variableDeclaration('const', [
 					b.variableDeclarator(b.identifier(`${name}$0`), requireIt(requireRequest).toAST()),
@@ -85,7 +101,7 @@ export default function examplesLoader(source) {
 						b.logicalExpression('||', b.identifier(`${name}$0.default`), b.identifier(`${name}$0`))
 					),
 				]),
-			])
+			]})
 		)
 	);
 
